@@ -2,15 +2,16 @@ from nose.tools import assert_equal
 
 from letterpress import Game
 
-def test_game():
-    # Construct a new game.
+def test_lock():
+    # Test the way that locked tiles are created.
+
     game = Game(
         '''
-        yzdao
-        bpzlk
-        dbxol
-        qslbc
-        nirhs
+        xxxxx
+        xxxxk
+        xxxol
+        xxxbc
+        xxxxx
         ''',
         word_list=set(['block']),
     )
@@ -31,3 +32,37 @@ def test_game():
     assert_equal(game.score('red'), 0)
     assert_equal(game.locked('blue'), [(4, 2)])
     assert_equal(game.locked('red'), [])
+
+def test_use_locked():
+    # Don't change the color of locked tiles.
+
+    game = Game(
+        '''
+        capxx
+        txxxx
+        xxxxx
+        xxxxx
+        xxxxx
+        ''',
+        word_list=set(['cat', 'cap']),
+    )
+
+    # Play a word that locks a tile.
+    game.play(
+        'blue',
+        [(0, 0), (1, 0), (0, 1)], # "cat"
+    )
+    assert_equal(game.tiles[(0, 0)].locked, True)
+    assert_equal(game.tiles[(0, 0)].color, 'blue')
+    assert_equal(game.score('blue'), 3)
+    assert_equal(game.score('red'), 0)
+
+    # Play a word using a locked tile. Its color doesn't change.
+    game.play(
+        'red',
+        [(0, 0), (1, 0), (2, 0)], # "cap"
+    )
+    assert_equal(game.tiles[(0, 0)].locked, False)
+    assert_equal(game.tiles[(0, 0)].color, 'blue')
+    assert_equal(game.score('blue'), 2)
+    assert_equal(game.score('red'), 2)

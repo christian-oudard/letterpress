@@ -30,9 +30,11 @@ class Game:
 
         # Color the tiles making up the word.
         for p in positions:
-            self.tiles[p].color = color
+            tile = self.tiles[p]
+            if not tile.locked:
+                tile.color = color
 
-        self._update_locked(color)
+        self._update_locked()
 
         return True
 
@@ -55,9 +57,9 @@ class Game:
             if tile.color == color:
                 yield tile
 
-    def _update_locked(self, color):
+    def _update_locked(self):
         # A tile is locked if all neighboring tiles have the same color.
-        for tile in list(self._tiles_colored(color)):
+        for tile in self.tiles.values():
             x, y = tile.position
             neighbor_positions = [
                 (x + 1, y),
@@ -66,5 +68,5 @@ class Game:
                 (x, y - 1),
             ]
             neighbor_tiles = [self.tiles.get(np) for np in neighbor_positions]
-            locked = all(nt.color == color for nt in neighbor_tiles if nt)
+            locked = all(nt.color == tile.color for nt in neighbor_tiles if nt)
             self.tiles[tile.position].locked = locked
